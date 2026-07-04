@@ -141,7 +141,7 @@ PhytoGNN_Engine/
 # ⚙️ Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/PhytoGNN_Engine.git
+git clone https://github.com/Psp6745/PhytoGNN_Engine.git
 cd PhytoGNN_Engine
 pip install -r requirements.txt
 python app.py
@@ -199,7 +199,7 @@ B.Tech Artificial Intelligence & Data Science
 
 CARE College of Engineering
 
-GitHub: https://github.com/YOUR_USERNAME
+GitHub: https://github.com/Psp6745
 
 LinkedIn: Add your LinkedIn profile
 
