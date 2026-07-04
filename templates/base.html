@@ -1,0 +1,280 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhytoGNN AI Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    
+    <!-- Premium Global CSS Styles for base layout and animated navbar -->
+    <style>
+        :root {
+            --deep-space: #070913;
+            --bg-secondary: #0d111d;
+            --accent-blue: #00d2ff;       /* Bright Neon Blue */
+            --accent-emerald: #10b981;    /* Emerald Green */
+            --accent-crimson: #ef4444;    /* Crimson Red */
+            --accent-violet: #8b5cf6;     /* Purple / Violet */
+            --text-muted: #8b9bb4;
+            --border-color: #26334d;
+            --glass-bg: rgba(13, 17, 29, 0.65);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--deep-space);
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            /* SECTION 8: Dynamic Entrance Fade Page Transition */
+            animation: pageFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Container Padding standard */
+        .main-container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* ============================================================= */
+        /* SECTION 2: Glassmorphism Navbar Container */
+        header {
+            position: relative;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            margin: 1.5rem 2rem 0 2rem;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            overflow: hidden;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* --- SECTION 1: Traveling Neon Border --- */
+        /* conic-gradient rotating background layer acting as an energy border */
+        header::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: conic-gradient(from 0deg, transparent 60%, var(--accent-blue) 80%, var(--accent-violet) 90%, var(--accent-blue) 100%);
+            border-radius: 14px;
+            z-index: -2;
+            animation: rotateBorder 6s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotateBorder {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Solid inner background layer to mask conics */
+        header::after {
+            content: '';
+            position: absolute;
+            top: 1px; left: 1px; right: 1px; bottom: 1px;
+            background: var(--bg-secondary);
+            border-radius: 11px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- SECTION 7: Radial Mouse Glow Layer --- */
+        .mouse-glow-radial {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(0, 210, 255, 0.12) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* --- SECTION 6: Moving Light Particle --- */
+        .glowing-particle-beam {
+            position: absolute;
+            top: 0;
+            left: -150px;
+            width: 120px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+            opacity: 0.6;
+            z-index: -1;
+            animation: travelBeam 12s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes travelBeam {
+            0% { left: -150px; }
+            10% { left: 110%; }
+            100% { left: 110%; }
+        }
+
+        /* --- SECTION 3: Logo Breathing Glow --- */
+        header h1 {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 40%, var(--accent-emerald) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            z-index: 2;
+            animation: breatheLogoGlow 4.5s ease-in-out infinite;
+        }
+
+        @keyframes breatheLogoGlow {
+            0%, 100% { filter: drop-shadow(0 0 2px rgba(16, 185, 129, 0.2)); }
+            50% { filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.55)); }
+        }
+
+        /* Navigation Links List */
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* --- SECTION 5: Link Hover Effects --- */
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-radius: 4px;
+            position: relative;
+            /* Cubic-bezier transition curves for premium interactive response */
+            transition: color 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                        transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Grow underline from center on Hover */
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent-blue);
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                        left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 0 8px var(--accent-blue);
+        }
+
+        nav a:hover {
+            color: #ffffff;
+            transform: translateY(-2px);
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+        }
+
+        nav a:hover::after {
+            width: 80%;
+            left: 10%;
+        }
+
+        /* --- SECTION 4: Active Page Indicator --- */
+        nav a.active {
+            color: var(--accent-blue);
+            transform: scale(1.05);
+            text-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
+        }
+
+        nav a.active::after {
+            width: 80%;
+            left: 10%;
+            background-color: var(--accent-blue);
+            box-shadow: 0 0 10px var(--accent-blue);
+        }
+
+        /* Responsive Mobile Layout Adaptations */
+        @media (max-width: 900px) {
+            header { flex-direction: column; gap: 1rem; margin: 1rem 1rem 0 1rem; padding: 1rem; }
+            nav { flex-wrap: wrap; justify-content: center; gap: 0.25rem; }
+            nav a { font-size: 0.85rem; padding: 0.4rem 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+    <header id="nav-header">
+        <!-- Traveling Particle Beam -->
+        <div class="glowing-particle-beam"></div>
+        
+        <!-- Radial Mouse Follower Light -->
+        <div id="mouse-radial-light" class="mouse-glow-radial"></div>
+
+        <h1>🌿 Phyto-AI Drug Discovery</h1>
+        <nav id="nav-links">
+            <a href="/">Dashboard</a>
+            <a href="/plants">Plants</a>
+            <a href="/chemicals">Chemicals</a>
+            <a href="/proteins">Proteins</a>
+            <a href="/predictions">Predictions</a>
+            <a href="/graph">Graph Explorer</a>
+            <a href="/analytics">Analytics</a>
+            <a href="/chatbot">Assistant</a>
+        </nav>
+    </header>
+    <div class="main-container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Active Indicator & Mouse Tracker JavaScript logic -->
+    <script>
+        // 1. Dynamic Active Page Indicator
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll("#nav-links a");
+
+            navLinks.forEach(link => {
+                const linkPath = link.getAttribute("href");
+                // Check if paths match safely
+                if (currentPath === linkPath || (linkPath !== '/' && currentPath.startsWith(linkPath))) {
+                    link.classList.add("active");
+                } else {
+                    link.classList.remove("active");
+                }
+            });
+        });
+
+        // 2. High-Performance Radial Mouse Tracker Glow
+        const navHeader = document.getElementById("nav-header");
+        const radialLight = document.getElementById("mouse-radial-light");
+
+        if (navHeader && radialLight) {
+            navHeader.addEventListener("mousemove", function(e) {
+                // Get local position of mouse relative to navbar boundaries
+                const rect = navHeader.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                radialLight.style.left = `${x}px`;
+                radialLight.style.top = `${y}px`;
+                radialLight.style.opacity = "1";
+            });
+
+            navHeader.addEventListener("mouseleave", function() {
+                radialLight.style.opacity = "0";
+            });
+        }
+    </script>
+</body>
+</html>

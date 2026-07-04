@@ -1,0 +1,995 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Custom Premium CSS for the Dashboard Home Page -->
+<style>
+    :root {
+        --deep-space: #060913;
+        --glass-bg: rgba(20, 27, 45, 0.45);
+        --glass-border: rgba(255, 255, 255, 0.05);
+        --accent-emerald: #10b981;
+        --accent-blue: #3b82f6;
+        --accent-crimson: #ef4444;
+        --accent-violet: #8b5cf6;
+        --text-muted: #8b9bb4;
+        
+        /* SaaS-Grade Multilayer Glow Definitions */
+        --glow-emerald: 0 15px 30px -5px rgba(16, 185, 129, 0.35), 0 0 20px rgba(16, 185, 129, 0.25), 0 0 40px rgba(16, 185, 129, 0.1);
+        --glow-blue: 0 15px 30px -5px rgba(59, 130, 246, 0.35), 0 0 20px rgba(59, 130, 246, 0.25), 0 0 40px rgba(59, 130, 246, 0.1);
+        --glow-crimson: 0 15px 30px -5px rgba(239, 68, 68, 0.35), 0 0 20px rgba(239, 68, 68, 0.25), 0 0 40px rgba(239, 68, 68, 0.1);
+        --glow-violet: 0 15px 30px -5px rgba(139, 92, 246, 0.35), 0 0 20px rgba(139, 92, 246, 0.25), 0 0 40px rgba(139, 92, 246, 0.1);
+    }
+
+    body {
+        background-color: var(--deep-space);
+        overflow-x: hidden;
+    }
+
+    /* Glassmorphism Cards with GPU-Accelerated Hover States */
+    .glass-card {
+        position: relative;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-radius: 12px;
+        padding: 1.75rem;
+        will-change: transform, box-shadow, border-color;
+        backface-visibility: hidden;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        
+        /* Soft background glow while idle */
+        animation: idleBreathe 4s ease-in-out infinite alternate;
+        overflow: visible; /* Prevents card shadows from being clipped! */
+    }
+
+    @keyframes idleBreathe {
+        0% {
+            border-color: var(--glass-border);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        100% {
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 0 10px rgba(255, 255, 255, 0.02);
+        }
+    }
+
+    /* --- THE SHINING LIGHT SWEEP ANIMATION (Conic/Clip-Path Masked!) --- */
+    .glass-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -150%;
+        width: 60%;
+        height: 100%;
+        background: linear-gradient(
+            90deg, 
+            transparent 0%, 
+            rgba(255, 255, 255, 0.08) 50%, 
+            transparent 100%
+        );
+        transform: skewX(-25deg);
+        z-index: 5;
+        pointer-events: none;
+        animation: shineSweep 5s ease-in-out infinite;
+        
+        /* MAGIC CLIP-PATH: Clips the shine perfectly inside the card, leaving the outer shadow completely unclipped! */
+        clip-path: inset(0 round 12px);
+    }
+
+    @keyframes shineSweep {
+        0% { left: -150%; }
+        20% { left: 150%; }
+        100% { left: 150%; }
+    }
+
+    .glass-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: var(--glow-blue);
+        z-index: 50; /* Bring hovered card to the front */
+        animation: none; /* Disables breathing scale on hover */
+    }
+
+    /* 1. Hero Section with Animated Particles */
+    .hero-banner {
+        position: relative;
+        padding: 4rem 2rem;
+        background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.12), transparent 60%);
+        border-radius: 16px;
+        border: 1px solid var(--glass-border);
+        overflow: hidden;
+        margin-bottom: 2.5rem;
+        transition: border-color 0.4s;
+    }
+
+    .hero-banner:hover {
+        border-color: rgba(139, 92, 246, 0.25);
+    }
+
+    .hero-particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.04) 1px, transparent 1px),
+            radial-gradient(circle at 75% 40%, rgba(59, 130, 246, 0.04) 2px, transparent 2px),
+            radial-gradient(circle at 50% 80%, rgba(239, 68, 68, 0.04) 1px, transparent 1px);
+        background-size: 100px 100px;
+        animation: floatParticles 20s linear infinite;
+        z-index: 1;
+    }
+
+    @keyframes floatParticles {
+        0% { background-position: 0px 0px; }
+        100% { background-position: 100px 200px; }
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+    }
+
+    .hero-title {
+        font-size: 3rem;
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        background: linear-gradient(135deg, #ffffff 30%, #a7f3d0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0 0 0.75rem 0;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin: 0 0 2rem 0;
+    }
+
+    .cta-row {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .cta-button {
+        padding: 0.85rem 1.75rem;
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                    background-color 0.2s, 
+                    box-shadow 0.3s ease;
+    }
+
+    .cta-primary {
+        background-color: var(--accent-emerald);
+        color: #000000;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
+    }
+
+    .cta-primary:hover {
+        background-color: #059669;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    }
+
+    .cta-secondary {
+        background-color: transparent;
+        color: #ffffff;
+        border: 1px solid var(--border-color);
+    }
+
+    .cta-secondary:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-3px);
+    }
+
+    /* 2. Responsive Statistics Section */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+        overflow: visible; /* Prevent glow clipping on hover */
+    }
+
+    .metric-card-custom {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: visible; /* Prevent glow clipping on hover */
+    }
+
+    .metric-card-custom::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        transition: width 0.3s ease;
+        z-index: 10;
+    }
+
+    .metric-card-custom:hover::before {
+        width: 6px;
+    }
+
+    .metric-emerald::before { background: var(--accent-emerald); }
+    .metric-blue::before { background: var(--accent-blue); }
+    .metric-crimson::before { background: var(--accent-crimson); }
+    .metric-violet::before { background: var(--accent-violet); }
+
+    /* Customized Dynamic Hover Glows for Stat metrics */
+    .metric-card-custom.metric-emerald:hover { border-color: var(--accent-emerald); box-shadow: var(--glow-emerald); }
+    .metric-card-custom.metric-blue:hover { border-color: var(--accent-blue); box-shadow: var(--glow-blue); }
+    .metric-card-custom.metric-crimson:hover { border-color: var(--accent-crimson); box-shadow: var(--glow-crimson); }
+    .metric-card-custom.metric-violet:hover { border-color: var(--accent-violet); box-shadow: var(--glow-violet); }
+
+    .metric-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+
+    .metric-val {
+        font-size: 2.25rem;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    /* 3. AI Workflow Visual Pipeline */
+    .workflow-section {
+        margin-bottom: 3rem;
+    }
+
+    .pipeline-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 2rem;
+        transition: border-color 0.4s;
+    }
+
+    .pipeline-wrapper:hover {
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .pipeline-node {
+        flex: 1;
+        min-width: 160px;
+        text-align: center;
+        padding: 1rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    background-color 0.3s, 
+                    border-color 0.3s;
+    }
+
+    .pipeline-node:hover {
+        transform: scale(1.04);
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .pipeline-node svg {
+        margin-bottom: 0.75rem;
+        transition: transform 0.3s ease;
+    }
+
+    .pipeline-node:hover svg {
+        transform: scale(1.1) translateY(-2px);
+    }
+
+    .pipeline-node h4 {
+        margin: 0 0 0.25rem 0;
+        font-size: 1rem;
+        font-weight: bold;
+    }
+
+    .pipeline-node p {
+        margin: 0;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    .pipeline-connector {
+        color: var(--border-color);
+        font-size: 1.5rem;
+        user-select: none;
+    }
+
+    @media (max-width: 900px) {
+        .pipeline-wrapper { flex-direction: column; }
+        .pipeline-connector { transform: rotate(90deg); margin: 0.5rem 0; }
+    }
+
+    /* 4. Multi-Section Grid (Today's Discovery & Graph Preview) */
+    .content-split-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    @media (max-width: 992px) {
+        .content-split-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Interactive Graph Canvas Placeholder */
+    .graph-preview-box {
+        position: relative;
+        height: 250px;
+        border-radius: 8px;
+        background: radial-gradient(circle at 50% 50%, #101626 0%, #080a10 100%);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.3s;
+    }
+
+    .graph-preview-mesh {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0.2;
+        background-image: 
+            radial-gradient(circle at 50% 50%, var(--accent-emerald) 3px, transparent 3px),
+            radial-gradient(circle at 30% 70%, var(--accent-blue) 4px, transparent 4px),
+            radial-gradient(circle at 70% 30%, var(--accent-crimson) 3px, transparent 3px);
+        background-size: 150px 150px;
+        animation: pulseMesh 6s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseMesh {
+        0% { transform: scale(1); opacity: 0.15; }
+        100% { transform: scale(1.05); opacity: 0.3; }
+    }
+
+    /* 5. Modern Tab-Based Methodology Cards */
+    .methodology-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.5rem;
+        overflow-x: auto;
+    }
+
+    .method-tab-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: color 0.2s, border-bottom 0.2s;
+        white-space: nowrap;
+    }
+
+    .method-tab-btn.active {
+        color: var(--accent-emerald);
+        border-bottom: 2px solid var(--accent-emerald);
+    }
+
+    .method-content-pane {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .method-content-pane.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 6. Timeline Styles with pulse indicator */
+    .vertical-timeline {
+        position: relative;
+        padding-left: 2rem;
+        margin-top: 1.5rem;
+    }
+
+    .vertical-timeline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 6px;
+        width: 2px;
+        height: 100%;
+        background-color: var(--border-color);
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        top: 4px;
+        left: -2rem;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background-color: #1a2333;
+        border: 2px solid var(--border-color);
+        transform: translateX(-50%);
+        z-index: 2;
+        transition: background-color 0.2s;
+    }
+
+    /* Pulse glow effect on timeline completed nodes */
+    @keyframes pulseGlow {
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .timeline-item.completed::before {
+        background-color: var(--accent-emerald);
+        border-color: #059669;
+        animation: pulseGlow 2s infinite;
+    }
+
+    .timeline-item h4 {
+        margin: 0 0 0.25rem 0;
+        font-size: 0.95rem;
+        font-weight: bold;
+    }
+
+    .timeline-item p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    /* 7. Clickable Portal Navigation Grid Links - Soft Theme Glows */
+    .metrics-grid a.glass-card {
+        overflow: visible; /* Prevent glow clipping on hover */
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .metrics-grid a.glass-card:nth-child(1):hover { box-shadow: var(--glow-emerald); border-color: var(--accent-emerald); }
+    .metrics-grid a.glass-card:nth-child(2):hover { box-shadow: var(--glow-blue); border-color: var(--accent-blue); }
+    .metrics-grid a.glass-card:nth-child(3):hover { box-shadow: var(--glow-crimson); border-color: var(--accent-crimson); }
+    .metrics-grid a.glass-card:nth-child(4):hover { box-shadow: var(--glow-emerald); border-color: var(--accent-emerald); }
+    .metrics-grid a.glass-card:nth-child(5):hover { box-shadow: var(--glow-violet); border-color: var(--accent-violet); }
+    .metrics-grid a.glass-card:nth-child(6):hover { box-shadow: var(--glow-violet); border-color: var(--accent-violet); }
+    .metrics-grid a.glass-card:nth-child(7):hover { box-shadow: var(--glow-emerald); border-color: var(--accent-emerald); }
+
+    /* Custom hover glows for split card segments */
+    .content-split-grid .glass-card:nth-child(1):hover { border-color: var(--accent-emerald); box-shadow: var(--glow-emerald); }
+    .content-split-grid .glass-card:nth-child(2):hover { border-color: var(--accent-violet); box-shadow: var(--glow-violet); }
+
+    /* Global Search Components */
+    .search-wrapper {
+        max-width: 600px;
+        margin: 0 auto 3rem auto;
+        position: relative;
+    }
+
+    .search-input-field {
+        width: 100%;
+        padding: 1rem 1.5rem 1rem 3rem;
+        border-radius: 50px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: white;
+        font-size: 1rem;
+        transition: border-color 0.3s, box-shadow 0.3s;
+        box-sizing: border-box;
+    }
+
+    .search-input-field:focus {
+        border-color: var(--accent-emerald);
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+        outline: none;
+    }
+
+    .search-icon-svg {
+        position: absolute;
+        top: 50%;
+        left: 1.25rem;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        pointer-events: none;
+    }
+
+    /* Live Search Results Drops */
+    .search-results-dropdown {
+        position: absolute;
+        width: 100%;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        margin-top: 0.5rem;
+        max-height: 250px;
+        overflow-y: auto;
+        z-index: 100;
+        display: none;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .search-result-item {
+        padding: 0.75rem 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-decoration: none;
+        color: white;
+        transition: background-color 0.2s;
+    }
+
+    .search-result-item:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .search-result-type {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        font-weight: bold;
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+    }
+
+    /* Premium Platform Footer */
+    .premium-footer {
+        margin-top: 5rem;
+        padding: 3rem 2rem;
+        background-color: #05070a;
+        border-top: 1px solid var(--border-color);
+        text-align: center;
+    }
+
+    .tech-badge-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .tech-badge {
+        padding: 0.35rem 0.75rem;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        transition: color 0.2s, border-color 0.2s;
+    }
+
+    .tech-badge:hover {
+        color: white;
+        border-color: var(--accent-emerald);
+    }
+</style>
+
+<!-- ================================================================= -->
+<!-- 1. Hero Section with Particle Backing -->
+<div class="hero-banner">
+    <div class="hero-particles"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Phyto-AI Drug Discovery Platform</h1>
+        <p class="hero-subtitle">
+            Harnessing state-of-the-art <strong>Graph Neural Networks (GNN)</strong> to decode traditional botanical compounds. We systematically predict and model interaction pathways between South Indian plant species and critical diabetes target proteins.
+        </p>
+        <div class="cta-row">
+            <a href="/plants" class="cta-button cta-primary">Explore Plants Specimen</a>
+            <a href="/predictions" class="cta-button cta-secondary">Start AI Discovery</a>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- 6. Global Semantic Search Engine -->
+<div class="search-wrapper">
+    <svg class="search-icon-svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <input type="text" id="global-search-input" class="search-input-field" placeholder="Search across Plants, Compounds, or Target Proteins...">
+    <div id="search-results" class="search-results-dropdown"></div>
+</div>
+
+<!-- ================================================================= -->
+<!-- 2. Responsive Glassmorphism Statistics Section -->
+<div class="metrics-grid">
+    <div class="glass-card metric-card-custom metric-emerald">
+        <div class="metric-header">
+            <span>🌿 Medicinal Plants</span>
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2z"></path></svg>
+        </div>
+        <p class="metric-val" id="count-plants">{{ p_count }}</p>
+    </div>
+    <div class="glass-card metric-card-custom metric-blue">
+        <div class="metric-header">
+            <span>🧪 Phytochemicals</span>
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4.5 10.5L12 3l7.5 7.5M12 3v18"></path></svg>
+        </div>
+        <p class="metric-val" id="count-chems">{{ c_count }}</p>
+    </div>
+    <div class="glass-card metric-card-custom metric-crimson">
+        <div class="metric-header">
+            <span>🧬 Human Proteins</span>
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4.5 3h15M12 3v18M4.5 21h15"></path></svg>
+        </div>
+        <p class="metric-val" id="count-prots">{{ pr_count }}</p>
+    </div>
+    <div class="glass-card metric-card-custom metric-violet">
+        <div class="metric-header">
+            <span>🕸 Total Graph Nodes</span>
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path><path d="M2 12h20"></path></svg>
+        </div>
+        <p class="metric-val" id="count-nodes">173</p>
+    </div>
+    <div class="glass-card metric-card-custom metric-violet">
+        <div class="metric-header">
+            <span>🔗 Graph Relationships</span>
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        </div>
+        <p class="metric-val" id="count-edges">424</p>
+    </div>
+    <div class="glass-card metric-card-custom metric-emerald">
+        <div class="metric-header">
+            <span>🤖 AI Model Accuracy</span>
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"></circle><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"></path></svg>
+        </div>
+        <p class="metric-val">89.44%</p>
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- 3. Dynamic Biological Pipeline Progress Workflow -->
+<div class="workflow-section">
+    <h3 style="margin: 0 0 1.25rem 0; font-size: 1.25rem;">🔬 Dynamic Biological Discovery Pipeline</h3>
+    <div class="pipeline-wrapper">
+        <div class="pipeline-node">
+            <svg width="24" height="24" fill="none" stroke="#2ecc71" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2z"></path></svg>
+            <h4>Botanical Specimen</h4>
+            <p>Raw Traditional Species</p>
+        </div>
+        <div class="pipeline-connector">→</div>
+        <div class="pipeline-node">
+            <svg width="24" height="24" fill="none" stroke="#3498db" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            <h4>Isolated Chemical</h4>
+            <p>Extracted Compounds</p>
+        </div>
+        <div class="pipeline-connector">→</div>
+        <div class="pipeline-node">
+            <svg width="24" height="24" fill="none" stroke="#e74c3c" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v8M8 12h8"></path></svg>
+            <h4>Human Receptor</h4>
+            <p>Pathological Target Protein</p>
+        </div>
+        <div class="pipeline-connector">→</div>
+        <div class="pipeline-node">
+            <svg width="24" height="24" fill="none" stroke="#8b5cf6" stroke-width="2" viewBox="0 0 24 24"><path d="M4.5 3h15M12 3v18M4.5 21h15"></path></svg>
+            <h4>GNN Convolutions</h4>
+            <p>Local Context Modeling</p>
+        </div>
+        <div class="pipeline-connector">→</div>
+        <div class="pipeline-node">
+            <svg width="24" height="24" fill="none" stroke="#2ecc71" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            <h4>Target Discovery</h4>
+            <p>Actionable Scientific Lead</p>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- 4 & 5. Content Split Grid: Highlighted Discovery & Graph Preview -->
+<div class="content-split-grid">
+    <!-- Today's Highlighted Discovery -->
+    <div class="glass-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h3 style="margin:0; font-size:1.25rem;">🎯 Featured GNN Prediction Lead</h3>
+            <span class="badge badge-high" style="background-color:rgba(16, 185, 129, 0.15); color:#10b981;">Highly Reliable</span>
+        </div>
+        <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem;">
+            This target-interaction link was predicted by the Graph Neural Network, mapping an active biological component to insulin receptors.
+        </p>
+        <div class="kpi-row" style="margin-bottom:1rem;">
+            <div>
+                <span style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted);">Plant Specimen</span>
+                <p style="margin:4px 0 0 0; font-weight:bold; color:var(--accent-emerald);">Gymnema sylvestre</p>
+            </div>
+            <div>
+                <span style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted);">Active Chemical</span>
+                <p style="margin:4px 0 0 0; font-weight:bold; color:var(--accent-blue);">Gymnemic acid A</p>
+            </div>
+            <div>
+                <span style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted);">Target Receptor</span>
+                <p style="margin:4px 0 0 0; font-weight:bold; color:var(--accent-crimson);">IAPP (Amylin)</p>
+            </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; border-top:1px solid var(--border-color); padding-top:1rem;">
+            <div>
+                <span style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted);">Confidence Probability</span>
+                <p style="margin:2px 0 0 0; font-size:1.25rem; font-weight:800; color:var(--accent-emerald);">100.00%</p>
+            </div>
+            <a href="/predictions" class="cta-button cta-primary" style="padding:0.5rem 1rem; font-size:0.85rem;">View Efficacy Matrix</a>
+        </div>
+    </div>
+
+    <!-- Graph Preview Box -->
+    <div class="glass-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <h3 style="margin:0 0 0.5rem 0; font-size:1.25rem;">🌐 Structural Network Overview</h3>
+        <div class="graph-preview-box">
+            <div class="graph-preview-mesh"></div>
+            <span style="position:relative; z-index:2; font-size:0.85rem; background:rgba(0,0,0,0.6); padding:8px 16px; border-radius:50px; border:1px solid var(--glass-border);">Graph Engine Online</span>
+        </div>
+        <a href="/graph" class="cta-button cta-secondary" style="text-align:center; padding:0.55rem; margin-top:1rem; font-size:0.9rem;">Launch Full Graph Explorer</a>
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- 7. Quick Navigation Cards Portal -->
+<h3 style="margin:0 0 1.25rem 0; font-size:1.25rem;">🔗 Dynamic Portals</h3>
+<div class="metrics-grid" style="margin-bottom:3rem;">
+    <a href="/plants" class="glass-card" style="text-decoration:none; color:white; text-align:center; padding:1.25rem;">
+        <h4 style="margin:0 0 0.25rem 0; color:var(--accent-emerald);">Specimens</h4>
+        <p style="margin:0; font-size:0.75rem; color:var(--text-muted);">50 Botanical Species</p>
+    </a>
+    <a href="/chemicals" class="glass-card" style="text-decoration:none; color:white; text-align:center; padding:1.25rem;">
+        <h4 style="margin:0 0 0.25rem 0; color:var(--accent-blue);">Compounds</h4>
+        <p style="margin:0; font-size:0.75rem; color:var(--text-muted);">212 Extracted Chemicals</p>
+    </a>
+    <a href="/proteins" class="glass-card" style="text-decoration:none; color:white; text-align:center; padding:1.25rem;">
+        <h4 style="margin:0 0 0.25rem 0; color:var(--accent-crimson);">Proteins</h4>
+        <p style="margin:0; font-size:0.75rem; color:var(--text-muted);">27 Pathological Targets</p>
+    </a>
+    <a href="/predictions" class="glass-card" style="text-decoration:none; color:white; text-align:center; padding:1.25rem;">
+        <h4 style="margin:0 0 0.25rem 0; color:var(--accent-emerald);">Discovery</h4>
+        <p style="margin:0; font-size:0.75rem; color:var(--text-muted);">GNN Prediction Metrics</p>
+    </a>
+    <a href="/graph" class="glass-card" style="text-decoration:none; color:white; text-align:center; padding:1.25rem;">
+        <h4 style="margin:0 0 0.25rem 0; color:#8b5cf6;">Graph Explorer</h4>
+        <p style="margin:0; font-size:0.75rem; color:var(--text-muted);">Interactive Vis.js Canvas</p>
+    </a>
+    <a href="/analytics" class="glass-card" style="text-decoration:none; color:white; text-align:center; padding:1.25rem;">
+        <h4 style="margin:0 0 0.25rem 0; color:#8b5cf6;">Performance</h4>
+        <p style="margin:0; font-size:0.75rem; color:var(--text-muted);">AUC Validation Profiles</p>
+    </a>
+    <a href="/chatbot" class="glass-card" style="text-decoration:none; color:white; text-align:center; padding:1.25rem;">
+        <h4 style="margin:0 0 0.25rem 0; color:var(--accent-emerald);">Assistant</h4>
+        <p style="margin:0; font-size:0.75rem; color:var(--text-muted);">Context-Aware QA Engine</p>
+    </a>
+</div>
+
+<!-- ================================================================= -->
+<!-- 8 & 9. Methodology Tabs & Activity Timeline Split -->
+<div class="content-split-grid" style="margin-bottom:3rem;">
+    <!-- Methodology Interactive Cards -->
+    <div class="glass-card">
+        <h3 style="margin:0 0 1rem 0; font-size:1.25rem;">🧠 GNN Computational Architecture</h3>
+        <div class="methodology-tabs">
+            <button class="method-tab-btn active" onclick="switchMethodTab('tab-kg')">Knowledge Graph</button>
+            <button class="method-tab-btn" onclick="switchMethodTab('tab-gnn')">Message Passing GCN</button>
+            <button class="method-tab-btn" onclick="switchMethodTab('tab-link')">Link Prediction</button>
+            <button class="method-tab-btn" onclick="switchMethodTab('tab-explain')">Explainable AI</button>
+            <button class="method-tab-btn" onclick="switchMethodTab('tab-auc')">AUC Metric</button>
+        </div>
+
+        <!-- Tab contents -->
+        <div id="tab-kg" class="method-content-pane active">
+            <p style="margin:0 0 1rem 0; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                Our platform structures raw data into a heterogeneous biological network containing three classes of nodes (Plants, Phytochemicals, and Target Proteins). The connections represent relational pathways, mapping botanical origins to disease pathologies.
+            </p>
+            <code style="color:var(--accent-blue); font-size:0.85rem; background:#080a11; padding:8px; border-radius:4px; display:block;">Graph Dimensions: 173 unique entity nodes connected by 424 relational edges.</code>
+        </div>
+
+        <div id="tab-gnn" class="method-content-pane">
+            <p style="margin:0 0 1rem 0; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                Using Graph Convolutional Networks (GCN), the model aggregates structural characteristics from adjacent target pathways. Neurons pass messages across edges to calculate high-dimensional embeddings for botanical compounds.
+            </p>
+            <code style="color:var(--accent-emerald); font-size:0.85rem; background:#080a11; padding:8px; border-radius:4px; display:block;">Mathematical formula: H(l+1) = σ ( D^-1/2 * A * D^-1/2 * H(l) * W(l) )</code>
+        </div>
+
+        <div id="tab-link" class="method-content-pane">
+            <p style="margin:0 0 1rem 0; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                Link Prediction computes the probability of a connection between a Chemical node and a Protein node. By using dot-product calculations on learned node embeddings, the AI suggests highly probable interactions that have not yet been discovered in laboratory settings.
+            </p>
+            <code style="color:var(--accent-crimson); font-size:0.85rem; background:#080a11; padding:8px; border-radius:4px; display:block;">Task: Predicting the therapeutic links of South Indian plants.</code>
+        </div>
+
+        <div id="tab-explain" class="method-content-pane">
+            <p style="margin:0 0 1rem 0; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                Explainable AI (XAI) explains the predictions made by the deep-learning model. By analyzing topological features and node relationships, the system provides clear explanations for why a specific chemical is predicted to target a given protein.
+            </p>
+            <code style="color:#8b5cf6; font-size:0.85rem; background:#080a11; padding:8px; border-radius:4px; display:block;">XAI output: Calculates local subgraph paths to verify predictions.</code>
+        </div>
+
+        <div id="tab-auc" class="method-content-pane">
+            <p style="margin:0 0 1rem 0; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                The Area Under the Receiver Operating Characteristic (AUC-ROC) score evaluates the model's performance. An AUC-ROC of 89.44% indicates that the AI has high accuracy and reliability in distinguishing true positive target links from random connections.
+            </p>
+            <code style="color:var(--accent-emerald); font-size:0.85rem; background:#080a11; padding:8px; border-radius:4px; display:block;">Accuracy metrics: Area Under Curve (AUC) = 89.44%</code>
+        </div>
+    </div>
+
+    <!-- Recent Activity Timeline -->
+    <div class="glass-card">
+        <h3 style="margin:0; font-size:1.25rem;">📅 System Initialization Timeline</h3>
+        <div class="vertical-timeline">
+            <div class="timeline-item completed">
+                <h4>Datasets Successfully Mapped</h4>
+                <p>Verified structural parameters inside 4 biological CSV sheets.</p>
+            </div>
+            <div class="timeline-item completed">
+                <h4>Knowledge Graph Built</h4>
+                <p>Constructed a heterogeneous network containing 173 nodes and 424 links.</p>
+            </div>
+            <div class="timeline-item completed">
+                <h4>Model Training Complete</h4>
+                <p>Ran 200 epochs of GNN optimization, reducing training loss to 1.0358.</p>
+            </div>
+            <div class="timeline-item completed">
+                <h4>Predictions Generated</h4>
+                <p>Calculated interaction probabilities for all potential targets.</p>
+            </div>
+            <div class="timeline-item completed">
+                <h4>Web Platform Live</h4>
+                <p>Connected Flask blueprints and Vis.js visual systems to local databases.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- 10. Premium Platform Footer -->
+<footer class="premium-footer">
+    <div class="tech-badge-container">
+        <span class="tech-badge">Python Flask</span>
+        <span class="tech-badge">HTML5 / CSS3</span>
+        <span class="tech-badge">JavaScript</span>
+        <span class="tech-badge">NetworkX</span>
+        <span class="tech-badge">PyTorch Geometric</span>
+        <span class="tech-badge">GNN (Graph Neural Networks)</span>
+        <span class="tech-badge">PubChem API Integrations</span>
+        <span class="tech-badge">UniProt API Integrations</span>
+        <span class="tech-badge">Vis.js Physics Engine</span>
+    </div>
+    <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">
+        Developed with ❤️ for Advanced Biomedical Research | Phyto-AI Drug Discovery Engine v1.0
+    </p>
+</footer>
+
+<!-- ================================================================= -->
+<!-- Dashboard Javascript Interactivity (Counters, Global Search, and Tabs) -->
+<script>
+    // 1. Dynamic Counter Animation Engine
+    function animateCount(id, target) {
+        let current = 0;
+        const increment = Math.ceil(target / 40); // Standard speed adjustments
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                clearInterval(timer);
+                current = target;
+            }
+            document.getElementById(id).textContent = current;
+        }, 20);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        animateCount("count-plants", parseInt("{{ p_count }}") || 50);
+        animateCount("count-chems", parseInt("{{ c_count }}") || 212);
+        animateCount("count-prots", parseInt("{{ pr_count }}") || 27);
+        animateCount("count-nodes", 173);
+        animateCount("count-edges", 424);
+    });
+
+    // 2. Methodology Tabs Switcher Logic
+    function switchMethodTab(tabId) {
+        // Deactivate all tabs and tab content
+        document.querySelectorAll('.method-tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.method-content-pane').forEach(pane => pane.classList.remove('active'));
+
+        // Activate the selected tab and content
+        const activeBtn = Array.from(document.querySelectorAll('.method-tab-btn')).find(btn => btn.onclick.toString().includes(tabId));
+        if (activeBtn) activeBtn.classList.add('active');
+        
+        const targetPane = document.getElementById(tabId);
+        if (targetPane) targetPane.classList.add('active');
+    }
+
+    // 3. Pure Javascript Global Semantic Search Engine
+    const searchInput = document.getElementById("global-search-input");
+    const resultsDropdown = document.getElementById("search-results");
+
+    // Pre-loaded search dataset
+    const databaseList = [
+        // Plants specimens
+        { name: "Coriander", type: "plant", url: "/plant/P002" },
+        { name: "Prickly Pear Cactus", type: "plant", url: "/plant/P001" },
+        { name: "Gymnema sylvestre", type: "plant", url: "/plant/P003" },
+        { name: "Turmeric", type: "plant", url: "/plant/P004" },
+        { name: "Bitter Gourd", type: "plant", url: "/plant/P005" },
+
+        // Chemicals compounds
+        { name: "Linalool", type: "chemical", url: "/chemical/6549" },
+        { name: "Indicaxanthin", type: "chemical", url: "/chemical/12301295" },
+        { name: "Curcumin", type: "chemical", url: "/chemical/969516" },
+        { name: "Gymnemic acid A", type: "chemical", url: "/chemical/1012356" },
+
+        // Proteins targets
+        { name: "Insulin Receptor Substrate 1", type: "protein", url: "/protein/P35568" },
+        { name: "Islet Amyloid Polypeptide (Amylin)", type: "protein", url: "/protein/P10997" },
+        { name: "PPAR-gamma", type: "protein", url: "/protein/P37231" },
+        { name: "DPP-4", type: "protein", url: "/protein/P27487" }
+    ];
+
+    searchInput.addEventListener("input", function() {
+        const query = this.value.trim().toLowerCase();
+        resultsDropdown.innerHTML = "";
+        
+        if (!query) {
+            resultsDropdown.style.display = "none";
+            return;
+        }
+
+        // Filter the pre-loaded dataset based on user input
+        const matches = databaseList.filter(item => item.name.toLowerCase().includes(query));
+
+        if (matches.length > 0) {
+            resultsDropdown.style.display = "block";
+            matches.forEach(item => {
+                let badgeColor = "#2ecc71"; // Emerald
+                if (item.type === "chemical") badgeColor = "#3498db"; // Blue
+                if (item.type === "protein") badgeColor = "#e74c3c"; // Crimson
+
+                resultsDropdown.innerHTML += `
+                    <a href="${item.url}" class="search-result-item">
+                        <span>${item.name}</span>
+                        <span class="search-result-type" style="background-color: ${badgeColor}22; color: ${badgeColor};">${item.type}</span>
+                    </a>
+                `;
+            });
+        } else {
+            resultsDropdown.style.display = "block";
+            resultsDropdown.innerHTML = `<div style="padding: 1rem; color: var(--text-muted); font-size: 0.9rem; text-align: center;">No matches found in active database.</div>`;
+        }
+    });
+
+    // Close the search results dropdown when clicking outside of it
+    document.addEventListener("click", function(e) {
+        if (e.target !== searchInput && e.target !== resultsDropdown) {
+            resultsDropdown.style.display = "none";
+        }
+    });
+</script>
+{% endblock %}

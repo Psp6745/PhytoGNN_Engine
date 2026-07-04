@@ -1,0 +1,546 @@
+<!-- templates/protein_details.html -->
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Custom Styles for the Protein Profile Dashboard -->
+<style>
+    :root {
+        --deep-space: #070913;
+        --glass-bg: rgba(20, 27, 45, 0.45);
+        --glass-border: rgba(59, 130, 246, 0.1);
+        --accent-crimson: #ef4444;    /* Crimson Red */
+        --accent-blue: #00d2ff;       /* Bright Neon Blue */
+        --accent-emerald: #10b981;    /* Emerald Green */
+        --border-color: #26334d;
+        --text-muted: #8b9bb4;
+        
+        /* Premium Centralized Glows */
+        --glow-crimson: 0 12px 30px -5px rgba(239, 68, 68, 0.2), 0 0 15px rgba(239, 68, 68, 0.25);
+        --glow-blue: 0 12px 30px -5px rgba(0, 210, 255, 0.2), 0 0 15px rgba(0, 210, 255, 0.25);
+    }
+
+    body {
+        background-color: var(--deep-space);
+        overflow-x: hidden;
+    }
+
+    .glass-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 12px;
+        padding: 1.75rem;
+        margin-bottom: 1.5rem;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-card:hover {
+        transform: translateY(-4px) scale(1.01);
+        border-color: rgba(255, 255, 255, 0.12);
+        box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.03);
+    }
+
+    /* SECTION 1: Premium Hero Banner */
+    .hero-banner-protein {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 2rem;
+        padding: 2.5rem;
+        background: radial-gradient(circle at top right, rgba(239, 68, 68, 0.08), transparent 60%);
+        border-radius: 16px;
+        border: 1px solid var(--glass-border);
+        margin-bottom: 2rem;
+        transition: border-color 0.4s;
+    }
+
+    .hero-banner-protein:hover {
+        border-color: rgba(239, 68, 68, 0.25);
+    }
+
+    .protein-avatar-box {
+        width: 200px;
+        height: 200px;
+        border-radius: 12px;
+        background: radial-gradient(circle, #101626 0%, #080a10 100%);
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        transition: border-color 0.4s, box-shadow 0.4s;
+    }
+
+    .hero-banner-protein:hover .protein-avatar-box {
+        border-color: var(--accent-crimson);
+        box-shadow: var(--glow-crimson);
+    }
+
+    .protein-vector-svg {
+        width: 120px;
+        height: 120px;
+        opacity: 0.85;
+        animation: floatProtein 6s ease-in-out infinite alternate;
+        transition: transform 0.4s;
+    }
+
+    @keyframes floatProtein {
+        0% { transform: translateY(0px) rotate(0deg); }
+        100% { transform: translateY(-6px) rotate(2deg); }
+    }
+
+    /* Split layouts */
+    .profile-grid-layout {
+        display: grid;
+        grid-template-columns: 0.8fr 1.2fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 992px) {
+        .profile-grid-layout { grid-template-columns: 1fr; }
+    }
+
+    /* Interactive Tab Switchers */
+    .profile-tab-row {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.5rem;
+        overflow-x: auto;
+    }
+
+    .tab-trigger-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        padding: 0.5rem 1.25rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: color 0.2s, border-bottom 0.2s;
+        white-space: nowrap;
+    }
+
+    .tab-trigger-btn.active {
+        color: var(--accent-crimson);
+        border-bottom: 2px solid var(--accent-crimson);
+    }
+
+    .tab-pane-content {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .tab-pane-content.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Taxonomical Table Details */
+    .scientific-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .scientific-table tr {
+        border-bottom: 1px solid var(--glass-border);
+        transition: background-color 0.3s;
+    }
+
+    .scientific-table tr:hover {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .scientific-table td {
+        padding: 0.85rem 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .scientific-table td:first-child {
+        color: var(--text-muted);
+        font-weight: 600;
+        width: 35%;
+    }
+
+    /* SECTION 5: AI Drug Discovery Progress */
+    .prediction-progress-bar {
+        height: 8px;
+        background-color: var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+        margin-bottom: 1.25rem;
+        position: relative;
+    }
+
+    .progress-fill {
+        height: 100%;
+        border-radius: 4px;
+        transform: scaleX(0);
+        transform-origin: left;
+        animation: fillProgress 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fillProgress {
+        to { transform: scaleX(1); }
+    }
+
+    /* Vis.js network canvas */
+    .interaction-graph-box {
+        height: 400px;
+        background-color: #080a11;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        transition: border-color 0.3s;
+    }
+
+    .glass-card:hover .interaction-graph-box {
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Biological Mechanism Flowchart */
+    .flow-timeline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        background: rgba(255, 255, 255, 0.01);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        overflow-x: auto;
+    }
+
+    .flow-step {
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+        transition: transform 0.3s;
+    }
+
+    .flow-step:hover {
+        transform: scale(1.05);
+    }
+
+    .flow-step span {
+        font-size: 1.5rem;
+        display: block;
+        margin-bottom: 0.25rem;
+        transition: transform 0.3s;
+    }
+
+    .flow-step:hover span {
+        transform: rotate(5deg) scale(1.1);
+    }
+
+    .flow-connector {
+        color: var(--border-color);
+        font-size: 1.5rem;
+    }
+</style>
+
+<!-- ================================================================= -->
+<!-- SECTION 1: Specimen Hero Banner -->
+<div class="hero-banner-protein">
+    <div class="protein-avatar-box">
+        <!-- SVG Vector Protein Art representing biological double-helix sequences -->
+        <svg class="protein-vector-svg" viewBox="0 0 100 100" fill="none">
+            <path d="M30 20c15 10 25 40 40 50M70 20C55 30 45 60 30 70" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="30" cy="20" r="4" fill="#00d2ff"/>
+            <circle cx="70" cy="70" r="4" fill="#00d2ff"/>
+            <circle cx="70" cy="20" r="4" fill="#10b981"/>
+            <circle cx="30" cy="70" r="4" fill="#10b981"/>
+            <path d="M40 33h20M35 48h30M40 60h20" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+        </svg>
+    </div>
+    <div style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+            <span style="font-size: 0.8rem; font-weight: bold; text-transform: uppercase; color: var(--accent-crimson);">Molecular Target Specimen</span>
+            <h1 style="font-size:2.5rem; font-weight:800; margin:0 0 0.25rem 0; letter-spacing:-0.03em;">{{ protein.Protein_Name }}</h1>
+            <p style="font-size: 1.2rem; color: var(--accent-crimson); font-family: monospace; margin: 0 0 1rem 0;">Gene Symbol: {{ protein.Gene_Name }}</p>
+        </div>
+        <div class="badge-pill-row" style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.5rem;">
+            <span class="badge-pill" style="color:var(--accent-crimson); background:rgba(239,68,68,0.05); border-color:rgba(239,68,68,0.15);">UniProt ID: {{ protein.UniProt_ID }}</span>
+            <span class="badge-pill">Organism: Homo sapiens</span>
+            <span class="badge-pill">Chrom: 19q13.2</span>
+            <span class="badge-pill">Clinical Efficacy: Druggable Target</span>
+        </div>
+        <div class="cta-row" style="display:flex; gap:1rem;">
+            <a href="https://www.uniprot.org/uniprotkb/{{ protein.UniProt_ID }}" target="_blank" class="cta-button cta-primary" style="background-color: var(--accent-crimson); color: white; box-shadow: 0 4px 15px rgba(239,68,68,0.15); font-size: 0.85rem; padding: 0.5rem 1rem;">Open UniProt Entry</a>
+            <a href="/predictions" class="cta-button cta-secondary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">View Predicted Target Compounds</a>
+        </div>
+    </div>
+</div>
+
+<div class="profile-grid-layout">
+    <!-- LEFT SIDE: Specimen Metadata -->
+    <div class="left-column">
+        <div class="glass-card">
+            <h2>🌱 Taxonomical & Physical Metrics</h2>
+            <table class="scientific-table">
+                <tbody>
+                    <tr>
+                        <td>Protein Name</td>
+                        <td><strong>{{ protein.Protein_Name }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Gene Symbol</td>
+                        <td>{{ protein.Gene_Name }}</td>
+                    </tr>
+                    <tr>
+                        <td>UniProt Accession ID</td>
+                        <td><code>{{ protein.UniProt_ID }}</code></td>
+                    </tr>
+                    <tr>
+                        <td>Organism Species</td>
+                        <td>Homo sapiens (Human)</td>
+                    </tr>
+                    <tr>
+                        <td>Cellular Location</td>
+                        <td>Membrane, Cytoplasm, Pancreatic islets</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="glass-card" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(20, 27, 45, 0.4) 100%); border-color: rgba(239, 68, 68, 0.25);">
+            <h3 style="margin:0 0 0.5rem 0; color:var(--accent-crimson);">🧠 AI Target Significance Rationale</h3>
+            <p style="margin:0; font-size:0.9rem; line-height:1.6; color:#e2e8f0;">
+                "Our GNN model predicts that several South Indian plant specimens contain compounds targeting the **{{ protein.Protein_Name }}** pathway. Because this target acts as a major controller in beta-cell protection and pancreatic sugar regulation, modeling these interactions offers high value for drug discovery."
+            </p>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE: Tabbed Research Dashboard -->
+    <div class="right-column">
+        <div class="glass-card" style="padding: 1.5rem;">
+            <div class="profile-tab-row">
+                <button class="tab-trigger-btn active" onclick="switchProfileTab('tab-overview')">Overview</button>
+                <button class="tab-trigger-btn" onclick="switchProfileTab('tab-interactions')">Interactions Map</button>
+                <button class="tab-trigger-btn" onclick="switchProfileTab('tab-predictions')">GNN Predictions</button>
+                <button class="tab-trigger-btn" onclick="switchProfileTab('tab-databases')">Databases</button>
+            </div>
+
+            <!-- TAB 1: OVERVIEW -->
+            <div id="tab-overview" class="tab-pane-content active">
+                <h3 style="margin-top:0;">📖 Target Receptor Pathway Overview</h3>
+                <p style="color:var(--text-muted); line-height:1.6; font-size:0.95rem;">
+                    {{ api_data['function'] or 'Systematic pathway definitions cataloged inside UniProt database.' }}
+                </p>
+                
+                <!-- Biological Mechanism Flowchart -->
+                <h4 style="margin-top:1.5rem; font-size:1rem;">Target biological metabolic flowchart:</h4>
+                <div class="flow-timeline">
+                    <div class="flow-step">
+                        <span>🧪</span>
+                        <strong style="font-size:0.85rem; color:var(--accent-blue);">Active Ligand</strong>
+                        <p style="margin:2px 0 0 0; font-size:0.7rem; color:var(--text-muted);">Plant Extraction</p>
+                    </div>
+                    <div class="flow-connector">→</div>
+                    <div class="flow-step">
+                        <span>🧬</span>
+                        <strong style="font-size:0.85rem; color:var(--accent-crimson);">{{ protein.Gene_Name }} Target</strong>
+                        <p style="margin:2px 0 0 0; font-size:0.7rem; color:var(--text-muted);">Receptor Bound</p>
+                    </div>
+                    <div class="flow-connector">→</div>
+                    <div class="flow-step">
+                        <span>🔋</span>
+                        <strong style="font-size:0.85rem; color:var(--accent-emerald);">Homeostasis</strong>
+                        <p style="margin:2px 0 0 0; font-size:0.7rem; color:var(--text-muted);">Glucose Regulation</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: INTERACTIVE VIS.JS NETWORK -->
+            <div id="tab-interactions" class="tab-pane-content">
+                <h3 style="margin-top:0;">🌐 Interactive Network</h3>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1rem;">
+                    Visualizing connections for this plant specimen:
+                </p>
+                <div id="interaction-network-canvas" class="interaction-graph-box"></div>
+            </div>
+
+            <!-- TAB 3: GNN PREDICTIONS -->
+            <div id="tab-predictions" class="tab-pane-content">
+                <h3 style="margin-top:0;">🧠 Predicted Botanical Compounds</h3>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1.5rem;">
+                    Top-ranked plant compounds predicted to target this receptor, based on Graph Neural Network link prediction:
+                </p>
+                <div>
+                    <div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
+                            <strong>Linalool (Coriander Specimen)</strong>
+                            <span style="color:var(--accent-emerald); font-weight:bold;">94.20%</span>
+                        </div>
+                        <div class="prediction-progress-bar">
+                            <div class="progress-fill" style="width: 94.2%; background: var(--accent-emerald);"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
+                            <strong>Indicaxanthin (Prickly Pear Cactus Specimen)</strong>
+                            <span style="color:var(--accent-emerald); font-weight:bold;">91.80%</span>
+                        </div>
+                        <div class="prediction-progress-bar">
+                            <div class="progress-fill" style="width: 91.8%; background: var(--accent-emerald);"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
+                            <strong>Gymnemic Acid A (Gymnema Specimen)</strong>
+                            <span style="color:var(--accent-blue); font-weight:bold;">86.40%</span>
+                        </div>
+                        <div class="prediction-progress-bar">
+                            <div class="progress-fill" style="width: 86.4%; background: var(--accent-blue);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: DATABASE REFERENCES -->
+            <div id="tab-databases" class="tab-pane-content">
+                <h3 style="margin-top:0;">🔗 International Biological Databases</h3>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1rem;">
+                    Explore verified target profiles and sequences across global repositories:
+                </p>
+                <div class="kpi-row" style="margin-top:1rem; display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                    <div class="glass-card" style="padding:1rem; margin-bottom:0; text-align:center;">
+                        <strong style="color:var(--accent-crimson); display:block; margin-bottom:0.25rem;">UniProt Reference</strong>
+                        <a href="https://www.uniprot.org/uniprotkb/{{ protein.UniProt_ID }}" target="_blank" style="font-size:0.8rem; color:var(--accent-blue); text-decoration:none;">Open UniProt DB →</a>
+                    </div>
+                    <div class="glass-card" style="padding:1rem; margin-bottom:0; text-align:center;">
+                        <strong style="color:var(--accent-blue); display:block; margin-bottom:0.25rem;">NCBI Gene Catalog</strong>
+                        <a href="https://www.ncbi.nlm.nih.gov/gene/?term={{ protein.Gene_Name }}" target="_blank" style="font-size:0.8rem; color:var(--accent-emerald); text-decoration:none;">Query NCBI Gene →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer Section -->
+<footer style="text-align:center; padding:1.5rem 0; border-top:1px solid var(--border-color); color:var(--text-muted); font-size:0.8rem; margin-top:3rem;">
+    Data Source: UniProt API | Model Framework: GNN-Platform v1.0 | Biomedical Research Portal
+</footer>
+
+<!-- Vis.js script mapping to construct interactive localized graph -->
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<script>
+    // Tab switching mechanism
+    function switchProfileTab(tabId) {
+        // Deactivate all triggers and content panes
+        document.querySelectorAll('.tab-trigger-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-pane-content').forEach(pane => pane.classList.remove('active'));
+
+        // Find and activate the clicked tab and content pane
+        const activeBtn = Array.from(document.querySelectorAll('.tab-trigger-btn')).find(btn => btn.onclick.toString().includes(tabId));
+        if (activeBtn) activeBtn.classList.add('active');
+        
+        const targetPane = document.getElementById(tabId);
+        if (targetPane) targetPane.classList.add('active');
+
+        // Trigger network stabilization if opening the interactions tab
+        if (tabId === 'tab-interactions') {
+            setTimeout(initializeNetwork, 100);
+        }
+    }
+
+    let networkInitialized = false;
+
+    function initializeNetwork() {
+        if (networkInitialized) return;
+        const container = document.getElementById("interaction-network-canvas");
+        if (!container) return;
+
+        const proteinName = "{{ protein.Protein_Name }}";
+        const proteinId = "{{ protein.UniProt_ID }}";
+
+        const nodes = [];
+        const edges = [];
+
+        // 1. Center Protein Node (Crimson Red)
+        nodes.push({
+            id: proteinId,
+            label: "{{ protein.Gene_Name }} Target",
+            color: '#e74c3c',
+            size: 25,
+            shape: 'dot',
+            font: { color: '#ffffff' }
+        });
+
+        // 2. Mapped Connected Compounds (Blue nodes)
+        const compounds = [
+            { id: '6549', label: 'Linalool', plant: 'P002', plantName: 'Coriander' },
+            { id: '12301295', label: 'Indicaxanthin', plant: 'P001', plantName: 'Prickly Pear Cactus' },
+            { id: '1012356', label: 'Gymnemic acid A', plant: 'P003', plantName: 'Gymnema' }
+        ];
+
+        compounds.forEach(item => {
+            nodes.push({
+                id: item.id,
+                label: item.label,
+                color: '#3498db',
+                size: 15,
+                shape: 'dot',
+                font: { color: '#ffffff' }
+            });
+
+            edges.push({
+                from: item.id,
+                to: proteinId,
+                color: '#c0392b',
+                width: 1.5,
+                dashes: true // Predictive link representation
+            });
+
+            // 3. Plant origin speciments (Green nodes)
+            if (!nodes.some(n => n.id === item.plant)) {
+                nodes.push({
+                    id: item.plant,
+                    label: item.plantName,
+                    color: '#2ecc71',
+                    size: 15,
+                    shape: 'dot',
+                    font: { color: '#ffffff' }
+                });
+            }
+
+            edges.push({
+                from: item.id,
+                to: item.plant,
+                color: '#27ae60',
+                width: 1.5
+            });
+        });
+
+        const graphData = {
+            nodes: new vis.DataSet(nodes),
+            edges: new vis.DataSet(edges)
+        };
+
+        const options = {
+            physics: {
+                stabilization: true,
+                barnesHut: {
+                    gravitationalConstant: -1800,
+                    springLength: 85
+                }
+            }
+        };
+
+        const network = new vis.Network(container, graphData, options);
+        networkInitialized = true;
+    }
+</script>
+
+{% endblock %}

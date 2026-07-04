@@ -1,0 +1,370 @@
+<!-- templates/plants.html -->
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Custom Premium CSS for the Specimen Catalog Page -->
+<style>
+    :root {
+        --deep-space: #070913;
+        --glass-bg: rgba(20, 27, 45, 0.45);
+        --glass-border: rgba(59, 130, 246, 0.1);
+        --accent-emerald: #10b981;    /* Emerald Green */
+        --accent-blue: #00d2ff;       /* Bright Neon Blue */
+        --border-color: #26334d;
+        --text-muted: #8b9bb4;
+        
+        /* Premium Glows */
+        --glow-emerald: 0 12px 30px -5px rgba(16, 185, 129, 0.2), 0 0 15px rgba(16, 185, 129, 0.25);
+        --glow-blue: 0 12px 30px -5px rgba(0, 210, 255, 0.2), 0 0 15px rgba(0, 210, 255, 0.25);
+    }
+
+    body {
+        background-color: var(--deep-space);
+        overflow-x: hidden;
+    }
+
+    /* Glassmorphism General Card Styling */
+    .glass-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 12px;
+        padding: 1.75rem;
+        margin-bottom: 1.5rem;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-card:hover {
+        transform: translateY(-6px) scale(1.02);
+        border-color: rgba(255, 255, 255, 0.12);
+        box-shadow: var(--glow-emerald);
+    }
+
+    /* Animated Section Divider Line */
+    .neon-divider {
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--accent-blue), var(--accent-emerald), transparent);
+        margin: 2.5rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .neon-divider::after {
+        content: '';
+        position: absolute;
+        top: 0; left: -100px;
+        width: 100px; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+        animation: slideSweep 6s infinite;
+    }
+
+    @keyframes slideSweep {
+        0% { left: -100px; }
+        15% { left: 110%; }
+        100% { left: 110%; }
+    }
+
+    /* Specimen Catalog Grid Layout */
+    .plants-grid-custom {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    /* High-End Plant Specimen Cards */
+    .plant-catalog-card {
+        background: linear-gradient(135deg, rgba(20, 27, 45, 0.6) 0%, rgba(12, 16, 28, 0.8) 100%);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-decoration: none;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 250px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        
+        /* Entrance animation on page load */
+        opacity: 0;
+        transform: translateY(12px);
+        animation: cardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes cardEntrance {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Staggered load delays */
+    .plant-catalog-card:nth-child(1) { animation-delay: 0.1s; }
+    .plant-catalog-card:nth-child(2) { animation-delay: 0.15s; }
+    .plant-catalog-card:nth-child(3) { animation-delay: 0.2s; }
+    .plant-catalog-card:nth-child(4) { animation-delay: 0.25s; }
+    .plant-catalog-card:nth-child(5) { animation-delay: 0.3s; }
+    .plant-catalog-card:nth-child(n+6) { animation-delay: 0.35s; }
+
+    .plant-catalog-card:hover {
+        transform: translateY(-6px) scale(1.02);
+        border-color: var(--accent-emerald);
+        box-shadow: var(--glow-emerald);
+    }
+
+    .card-top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .card-badge {
+        font-size: 0.75rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--accent-emerald);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .plant-catalog-card:hover .card-badge {
+        transform: scale(1.05);
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+    }
+
+    .card-specimen-id {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .card-plant-name {
+        font-size: 1.35rem;
+        font-weight: 800;
+        margin: 0 0 0.25rem 0;
+        letter-spacing: -0.02em;
+        transition: letter-spacing 0.3s, text-shadow 0.3s;
+    }
+
+    .plant-catalog-card:hover .card-plant-name {
+        letter-spacing: -0.01em;
+        text-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+    }
+
+    .card-scientific-name {
+        font-size: 0.95rem;
+        font-style: italic;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid var(--glass-border);
+        padding-top: 0.75rem;
+        margin-top: auto;
+    }
+
+    .explore-btn-text {
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: var(--accent-emerald);
+        transition: transform 0.3s, text-shadow 0.3s;
+    }
+
+    .plant-catalog-card:hover .explore-btn-text {
+        transform: translateX(4px);
+        text-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+    }
+
+    .card-footer svg {
+        transition: transform 0.3s;
+    }
+
+    .plant-catalog-card:hover .card-footer svg {
+        transform: translateX(3px);
+    }
+
+    /* Stylized vector leaf background decoration */
+    .card-vector-leaf {
+        position: absolute;
+        right: -10px;
+        bottom: 25px;
+        width: 100px;
+        height: 100px;
+        opacity: 0.04;
+        color: var(--accent-emerald);
+        pointer-events: none;
+        transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .plant-catalog-card:hover .card-vector-leaf {
+        opacity: 0.1;
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    /* Search field focus glow effect */
+    .local-search-container {
+        max-width: 500px;
+        margin-bottom: 2rem;
+    }
+
+    .local-search-bar {
+        width: 100%;
+        padding: 0.85rem 1.25rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        color: white;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .local-search-bar:focus {
+        border-color: var(--accent-emerald);
+        box-shadow: var(--glow-emerald);
+    }
+</style>
+
+<!-- ================================================================= -->
+<!-- Header Banner Section with custom radial background glows -->
+<div class="glass-card" style="background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.06), transparent 60%); padding: 2.5rem; border-radius: 16px; margin-bottom: 2rem;">
+    <span style="font-size: 0.8rem; font-weight: bold; text-transform: uppercase; color: var(--accent-emerald);">Specimen Catalog</span>
+    <h1 style="font-size: 2.5rem; font-weight: 800; margin: 0.25rem 0 0.5rem 0; letter-spacing: -0.03em;">Mapped Specimen Directory</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 800px; margin: 0; line-height: 1.6;">
+        Explore clinically significant medicinal plants native to South India. Analyze their traditional medical efficacy, isolated active compounds, and target pathobiology metrics.
+    </p>
+</div>
+
+<!-- ================================================================= -->
+<!-- Research Statistics Strip -->
+<div class="kpi-row" style="margin-bottom: 2rem;">
+    <div class="glass-card" style="padding:1.25rem; text-align:center; margin-bottom: 0;">
+        <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Mapped Species</span>
+        <p style="margin:5px 0 0 0; font-size:1.75rem; font-weight:bold; color:var(--accent-emerald);" id="count-total">{{ plants|length }}</p>
+    </div>
+    <div class="glass-card" style="padding:1.25rem; text-align:center; margin-bottom: 0;">
+        <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Botanical Families</span>
+        <p style="margin:5px 0 0 0; font-size:1.75rem; font-weight:bold; color:var(--accent-blue);">12 Families</p>
+    </div>
+    <div class="glass-card" style="padding:1.25rem; text-align:center; margin-bottom: 0;">
+        <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">AI Accuracy AUC</span>
+        <p style="margin:5px 0 0 0; font-size:1.75rem; font-weight:bold; color:var(--accent-emerald);">89.44%</p>
+    </div>
+</div>
+
+<div class="neon-divider"></div>
+
+<!-- ================================================================= -->
+<!-- Local Specimen Filter Search Bar -->
+<div class="local-search-container">
+    <input type="text" id="plant-search" class="local-search-bar" onkeyup="searchSpecimenCatalog()" placeholder="Filter specimens by common or scientific taxonomy...">
+</div>
+
+<!-- ================================================================= -->
+<!-- Mapped Plant Specimens Catalog Grid -->
+<div class="plants-grid-custom" id="catalog-grid">
+    {% for plant in plants %}
+    <a href="/plant/{{ plant.Plant_ID }}" class="plant-catalog-card" data-common="{{ plant.Common_Name_of_Plant|lower }}" data-scientific="{{ plant.Scientific_Name|lower }}">
+        
+        <!-- Interactive vector background decoration leaf -->
+        <svg class="card-vector-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2C6.5 2 2 10 2 12c0 2 4.5 10 10 10s10-8 10-10c0-2-4.5-10-10-10z"></path>
+            <path d="M12 2v20"></path>
+            <path d="M12 7c3 1 5 3 5 5"></path>
+            <path d="M12 12c3 1 5 3 5 5"></path>
+            <path d="M12 12c-3 1-5 3-5 5"></path>
+            <path d="M12 7c-3 1-5 3-5 5"></path>
+        </svg>
+
+        <div class="card-top-row">
+            <span class="card-badge">Specimen Specie</span>
+            <span class="card-specimen-id">{{ plant.Plant_ID }}</span>
+        </div>
+        
+        <div style="margin-bottom: 1rem; position:relative; z-index: 2;">
+            <h3 class="card-plant-name">{{ plant.Common_Name_of_Plant }}</h3>
+            <p class="card-scientific-name">{{ plant.Scientific_Name or 'Botanical species classified' }}</p>
+        </div>
+
+        <div class="card-footer">
+            <span class="explore-btn-text">Explore Chemistry →</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+
+<!-- Empty State Alert (Hidden by default) -->
+<div id="empty-alert" class="glass-card" style="display:none; text-align:center; padding:3.5rem; color:var(--text-muted); border-color:var(--border-color);">
+    <span style="font-size:2.5rem; display:block; margin-bottom:1rem;">🔬</span>
+    <h3>No Botanical Specimen Matches</h3>
+    <p>No plants match your search parameters. Try verifying your taxonomy spelling.</p>
+</div>
+
+<!-- ================================================================= -->
+<!-- Footer Section -->
+<footer style="text-align:center; padding:1.5rem 0; border-top:1px solid var(--border-color); color:var(--text-muted); font-size:0.8rem;">
+    Data Source: GNN-Platform Reference | Dynamic Platform v1.0 | Biomedical Research Portal
+</footer>
+
+<!-- Interactive Client-side filter JS -->
+<script>
+    function searchSpecimenCatalog() {
+        const query = document.getElementById("plant-search").value.toLowerCase().trim();
+        const cards = document.querySelectorAll(".plant-catalog-card");
+        const grid = document.getElementById("catalog-grid");
+        const emptyAlert = document.getElementById("empty-alert");
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const common = card.getAttribute("data-common");
+            const scientific = card.getAttribute("data-scientific");
+
+            if (common.includes(query) || scientific.includes(query)) {
+                card.style.display = "flex";
+                visibleCount++;
+            } else {
+                card.style.display = "none";
+            }
+        });
+
+        if (visibleCount === 0) {
+            emptyAlert.style.display = "block";
+            grid.style.display = "none";
+        } else {
+            emptyAlert.style.display = "none";
+            grid.style.display = "grid";
+        }
+    }
+
+    // Dynamic numeric animations
+    function animateNumeric(id, target) {
+        let current = 0;
+        const increment = Math.ceil(target / 30);
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                clearInterval(timer);
+                current = target;
+            }
+            document.getElementById(id).textContent = current;
+        }, 30);
+    }
+
+    animateNumeric("count-total", {{ plants|length }});
+</script>
+
+{% endblock %}

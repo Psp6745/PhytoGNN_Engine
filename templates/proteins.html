@@ -1,0 +1,437 @@
+<!-- templates/proteins.html -->
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Unified Premium Style Overhaul for Therapeutic Protein Library -->
+<style>
+    :root {
+        --deep-space: #070913;
+        --glass-bg: rgba(20, 27, 45, 0.45);
+        --glass-border: rgba(59, 130, 246, 0.1);
+        --accent-crimson: #ef4444;    /* Crimson Red */
+        --accent-blue: #00d2ff;       /* Bright Neon Blue */
+        --accent-emerald: #10b981;    /* Emerald Green */
+        --border-color: #26334d;
+        --text-muted: #8b9bb4;
+        
+        /* Premium Centralized Glows */
+        --glow-crimson: 0 12px 30px -5px rgba(239, 68, 68, 0.2), 0 0 15px rgba(239, 68, 68, 0.25);
+        --glow-blue: 0 12px 30px -5px rgba(0, 210, 255, 0.2), 0 0 15px rgba(0, 210, 255, 0.25);
+    }
+
+    body {
+        background-color: var(--deep-space);
+        overflow-x: hidden;
+    }
+
+    /* Glassmorphism General Card Styling */
+    .glass-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-card:hover {
+        transform: translateY(-6px) scale(1.02);
+        border-color: rgba(255, 255, 255, 0.12);
+        box-shadow: var(--glow-blue);
+    }
+
+    /* Animated DNA double-helix decoration */
+    .dna-banner-container {
+        position: relative;
+        overflow: hidden;
+        background: radial-gradient(circle at top right, rgba(0, 210, 255, 0.08), transparent 60%);
+        border-radius: 16px;
+        border: 1px solid var(--glass-border);
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        transition: border-color 0.4s;
+    }
+
+    .dna-banner-container:hover {
+        border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .dna-animation {
+        position: absolute;
+        right: 5%;
+        top: 20%;
+        width: 150px;
+        height: 80px;
+        opacity: 0.35;
+        background-image: 
+            radial-gradient(circle at 10% 20%, var(--accent-blue) 4px, transparent 4px),
+            radial-gradient(circle at 30% 60%, var(--accent-crimson) 4px, transparent 4px),
+            radial-gradient(circle at 50% 10%, var(--accent-emerald) 4px, transparent 4px),
+            radial-gradient(circle at 70% 80%, var(--accent-blue) 4px, transparent 4px),
+            radial-gradient(circle at 90% 30%, var(--accent-crimson) 4px, transparent 4px);
+        background-size: 100% 100%;
+        animation: rotateHelix 10s linear infinite;
+    }
+
+    @keyframes rotateHelix {
+        0% { transform: rotate(0deg) scale(1); }
+        50% { transform: rotate(180deg) scale(1.1); }
+        100% { transform: rotate(360deg) scale(1); }
+    }
+
+    /* Advanced Controls Row */
+    .controls-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .controls-grid { grid-template-columns: 1fr; }
+    }
+
+    .search-input-field {
+        width: 100%;
+        padding: 0.85rem 1.25rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        color: white;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .search-input-field:focus {
+        border-color: var(--accent-blue);
+        box-shadow: var(--glow-blue);
+    }
+
+    .custom-select {
+        width: 100%;
+        padding: 0.85rem 1.25rem;
+        border-radius: 8px;
+        background: #121824;
+        border: 1px solid var(--border-color);
+        color: white;
+        outline: none;
+        cursor: pointer;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .custom-select:hover {
+        border-color: var(--accent-blue);
+        box-shadow: var(--glow-blue);
+    }
+
+    /* Protein Grid Layout */
+    .proteins-catalog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    /* High-End Protein Compound Cards */
+    .protein-library-card {
+        background: linear-gradient(135deg, rgba(20, 27, 45, 0.6) 0%, rgba(12, 16, 28, 0.8) 100%);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-decoration: none;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 220px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+
+        /* Entrance animation on page load */
+        opacity: 0;
+        transform: translateY(12px);
+        animation: cardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes cardEntrance {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Staggered load delays */
+    .protein-library-card:nth-child(1) { animation-delay: 0.1s; }
+    .protein-library-card:nth-child(2) { animation-delay: 0.15s; }
+    .protein-library-card:nth-child(3) { animation-delay: 0.2s; }
+    .protein-library-card:nth-child(4) { animation-delay: 0.25s; }
+    .protein-library-card:nth-child(5) { animation-delay: 0.3s; }
+    .protein-library-card:nth-child(n+6) { animation-delay: 0.35s; }
+
+    .protein-library-card:hover {
+        transform: translateY(-6px) scale(1.02);
+        border-color: var(--accent-crimson);
+        box-shadow: var(--glow-crimson);
+    }
+
+    .card-badge-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .protein-badge-crimson {
+        font-size: 0.75rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--accent-crimson);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .protein-library-card:hover .protein-badge-crimson {
+        transform: scale(1.05);
+        box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
+    }
+
+    .protein-specimen-id {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .protein-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0 0 0.25rem 0;
+        letter-spacing: -0.02em;
+        transition: letter-spacing 0.3s, text-shadow 0.3s;
+    }
+
+    .protein-library-card:hover .protein-title {
+        letter-spacing: -0.01em;
+        text-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
+    }
+
+    .protein-subtitle {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+    }
+
+    .protein-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid var(--glass-border);
+        padding-top: 0.75rem;
+        margin-top: auto;
+    }
+
+    .explore-btn-text {
+        font-size: 0.75rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: var(--accent-crimson);
+        transition: transform 0.3s, text-shadow 0.3s;
+    }
+
+    .protein-library-card:hover .explore-btn-text {
+        transform: translateX(4px);
+        text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+    }
+
+    .protein-footer svg {
+        transition: transform 0.3s;
+    }
+
+    .protein-library-card:hover .protein-footer svg {
+        transform: translateX(3px) scale(1.1);
+    }
+
+    /* Floating vector protein background */
+    .card-vector-protein {
+        position: absolute;
+        right: -10px;
+        bottom: 25px;
+        width: 100px;
+        height: 100px;
+        opacity: 0.03;
+        color: var(--accent-crimson);
+        pointer-events: none;
+        transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .protein-library-card:hover .card-vector-protein {
+        opacity: 0.08;
+        transform: scale(1.1) rotate(5deg);
+    }
+</style>
+
+<!-- ================================================================= -->
+<!-- Header Banner Section with custom radial background glows -->
+<div class="dna-banner-container">
+    <div class="dna-animation"></div>
+    <div style="position: relative; z-index: 2; max-width: 800px;">
+        <span style="font-size: 0.8rem; font-weight: bold; text-transform: uppercase; color: var(--accent-crimson);">Therapeutic Target Library</span>
+        <h1 style="font-size: 2.5rem; font-weight: 800; margin: 0.25rem 0 0.5rem 0; letter-spacing: -0.03em;">Diabetes Therapeutic Protein Library</h1>
+        <p style="color: var(--text-muted); font-size: 1.1rem; margin: 0; line-height: 1.6;">
+            Explore clinically significant human proteins involved in glucose metabolism, insulin signaling pathways, pancreatic beta-cell regulation, and diabetic complications.
+        </p>
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- Research Statistics Strip -->
+<div class="kpi-row" style="margin-bottom: 2rem;">
+    <div class="glass-card" style="padding:1.25rem; text-align:center; margin-bottom: 0;">
+        <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Mapped Targets</span>
+        <p style="margin:5px 0 0 0; font-size:1.75rem; font-weight:bold; color:var(--accent-crimson);" id="count-total">{{ proteins|length }}</p>
+    </div>
+    <div class="glass-card" style="padding:1.25rem; text-align:center; margin-bottom: 0;">
+        <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Druggable Receptors</span>
+        <p style="margin:5px 0 0 0; font-size:1.75rem; font-weight:bold; color:var(--accent-blue);">18 Targets</p>
+    </div>
+    <div class="glass-card" style="padding:1.25rem; text-align:center; margin-bottom: 0;">
+        <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Avg prediction score</span>
+        <p style="margin:5px 0 0 0; font-size:1.75rem; font-weight:bold; color:var(--accent-emerald);">89.44%</p>
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- Advanced Search & Filter Controls -->
+<div class="controls-grid">
+    <div>
+        <input type="text" id="protein-search" class="search-input-field" placeholder="Search by Protein Name, Gene Symbol, or UniProt ID...">
+    </div>
+    <div>
+        <select id="protein-filter" class="custom-select" onchange="filterProteins()">
+            <option value="all">All Pathways</option>
+            <option value="insulin">Insulin Signaling</option>
+            <option value="glucose">Glucose Transport</option>
+            <option value="enzyme">Enzymatic Receptor</option>
+        </select>
+    </div>
+    <div>
+        <button onclick="resetFilters()" class="cta-button cta-secondary" style="width: 100%; box-sizing: border-box; padding: 0.8rem;">Reset Filters</button>
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- Mapped Proteins Catalog Grid -->
+<div class="proteins-catalog-grid" id="proteins-grid">
+    {% for protein in proteins %}
+    <a href="/protein/{{ protein.UniProt_ID }}" class="protein-library-card" data-name="{{ protein.Protein_Name|lower }}" data-gene="{{ protein.Gene_Name|lower }}" data-uniprot="{{ protein.UniProt_ID|lower }}">
+        
+        <!-- Floating Vector Protein Decoration -->
+        <svg class="card-vector-protein" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M4.5 3h15M12 3v18M4.5 21h15"></path>
+        </svg>
+
+        <div class="card-badge-row">
+            <span class="protein-badge-crimson">Target Receptor</span>
+            <span class="protein-specimen-id">{{ protein.UniProt_ID }}</span>
+        </div>
+        <div style="margin-bottom: 1rem; position:relative; z-index:2;">
+            <h3 class="protein-title">{{ protein.Protein_Name }}</h3>
+            <p class="protein-subtitle">Gene Symbol: <strong>{{ protein.Gene_Name }}</strong></p>
+        </div>
+        <div class="protein-footer">
+            <span class="explore-btn-text">Explore Molecular Profile →</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 3h15M12 3v18M4.5 21h15"></path></svg>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+
+<!-- No Results Alert -->
+<div id="no-results" class="glass-card" style="display:none; text-align:center; padding:3rem; color:var(--text-muted); border-color:var(--border-color);">
+    <span style="font-size:2rem; display:block; margin-bottom:1rem;">🧬</span>
+    <h3>No target protein matches located in database.</h3>
+    <p>Verify your search string or reset pathway parameters above.</p>
+</div>
+
+<!-- ================================================================= -->
+<!-- Footer Section -->
+<footer style="text-align:center; padding:1.5rem 0; border-top:1px solid var(--border-color); color:var(--text-muted); font-size:0.8rem; margin-top:3rem;">
+    Data Source: UniProt Consortium Reference | Mapping Engine: GNN-Platform v1.0 | Biomedical Research Portal
+</footer>
+
+<!-- Dynamic Client-side Filters JS -->
+<script>
+    const searchInput = document.getElementById("protein-search");
+    const selectFilter = document.getElementById("protein-filter");
+    const gridItems = document.querySelectorAll(".protein-library-card");
+    const noResultsDiv = document.getElementById("no-results");
+
+    function filterProteins() {
+        const query = searchInput.value.trim().toLowerCase();
+        const selectedPathway = selectFilter.value;
+        let visibleCount = 0;
+
+        gridItems.forEach(card => {
+            const name = card.getAttribute("data-name");
+            const gene = card.getAttribute("data-gene");
+            const uniprot = card.getAttribute("data-uniprot");
+
+            const matchesSearch = name.includes(query) || gene.includes(query) || uniprot.includes(query);
+            
+            // Simulates category filtering based on Gene names in standard datasets
+            let matchesPathway = true;
+            if (selectedPathway === "insulin") {
+                matchesPathway = gene.includes("irs") || gene.includes("insr") || name.includes("insulin");
+            } else if (selectedPathway === "glucose") {
+                matchesPathway = gene.includes("glut") || gene.includes("slc") || name.includes("glucose");
+            } else if (selectedPathway === "enzyme") {
+                matchesPathway = gene.includes("dpp") || name.includes("kinase");
+            }
+
+            if (matchesSearch && matchesPathway) {
+                card.style.display = "flex";
+                visibleCount++;
+            } else {
+                card.style.display = "none";
+            }
+        });
+
+        if (visibleCount === 0) {
+            noResultsDiv.style.display = "block";
+        } else {
+            noResultsDiv.style.display = "none";
+        }
+    }
+
+    function resetFilters() {
+        searchInput.value = "";
+        selectFilter.value = "all";
+        filterProteins();
+    }
+
+    searchInput.addEventListener("input", filterProteins);
+
+    // Dynamic metrics animations
+    function animateCount(id, target) {
+        let current = 0;
+        const speed = Math.ceil(target / 30);
+        const timer = setInterval(() => {
+            current += speed;
+            if (current >= target) {
+                clearInterval(timer);
+                current = target;
+            }
+            document.getElementById(id).textContent = current;
+        }, 30);
+    }
+    animateCount("count-total", {{ proteins|length }});
+</script>
+
+{% endblock %}

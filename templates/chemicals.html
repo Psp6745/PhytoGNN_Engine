@@ -1,0 +1,422 @@
+<!-- templates/chemicals.html -->
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Custom Styles for the Phytochemical Compound Library -->
+<style>
+    :root {
+        --deep-space: #070913;
+        --glass-bg: rgba(20, 27, 45, 0.45);
+        --glass-border: rgba(59, 130, 246, 0.1);
+        --accent-blue: #00d2ff;       /* Bright Neon Blue */
+        --accent-emerald: #10b981;    /* Emerald Green */
+        --accent-crimson: #ef4444;    /* Crimson Red */
+        --glow-blue: 0 12px 30px -5px rgba(0, 210, 255, 0.2), 0 0 15px rgba(0, 210, 255, 0.25);
+        --glow-emerald: 0 12px 30px -5px rgba(16, 185, 129, 0.2), 0 0 15px rgba(16, 185, 129, 0.25);
+        --text-muted: #8b9bb4;
+        --border-color: #26334d;
+    }
+
+    body {
+        background-color: var(--deep-space);
+        overflow-x: hidden;
+    }
+
+    /* Glassmorphism General Card Styling */
+    .glass-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 12px;
+        padding: 1.75rem;
+        margin-bottom: 1.5rem;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-card:hover {
+        transform: translateY(-6px) scale(1.02);
+        border-color: rgba(255, 255, 255, 0.12);
+        box-shadow: var(--glow-blue);
+    }
+
+    /* Search & Filter Controls */
+    .filter-search-wrapper {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .filter-search-wrapper { grid-template-columns: 1fr; }
+    }
+
+    .search-bar-input {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        color: white;
+        font-size: 1rem;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .search-bar-input:focus {
+        border-color: var(--accent-blue);
+        box-shadow: var(--glow-blue);
+    }
+
+    .custom-select {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        background: #121824;
+        border: 1px solid var(--border-color);
+        color: white;
+        font-size: 1rem;
+        outline: none;
+        cursor: pointer;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .custom-select:hover {
+        border-color: var(--accent-blue);
+        box-shadow: var(--glow-blue);
+    }
+
+    /* Chemicals Grid Layout */
+    .chemicals-library-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    /* High-End Chemical Compound Cards */
+    .compound-library-card {
+        background: linear-gradient(135deg, rgba(20, 27, 45, 0.6) 0%, rgba(12, 16, 28, 0.8) 100%);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-decoration: none;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 180px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                    box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+
+        /* Entrance animation on page load */
+        opacity: 0;
+        transform: translateY(12px);
+        animation: cardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes cardEntrance {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Staggered load delays */
+    .compound-library-card:nth-child(1) { animation-delay: 0.1s; }
+    .compound-library-card:nth-child(2) { animation-delay: 0.15s; }
+    .compound-library-card:nth-child(3) { animation-delay: 0.2s; }
+    .compound-library-card:nth-child(4) { animation-delay: 0.25s; }
+    .compound-library-card:nth-child(5) { animation-delay: 0.3s; }
+    .compound-library-card:nth-child(n+6) { animation-delay: 0.35s; }
+
+    .compound-library-card:hover {
+        transform: translateY(-6px) scale(1.02);
+        border-color: var(--accent-blue);
+        box-shadow: var(--glow-blue);
+    }
+
+    .compound-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .compound-badge {
+        font-size: 0.75rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        background: rgba(59, 130, 246, 0.15);
+        color: var(--accent-blue);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .compound-library-card:hover .compound-badge {
+        transform: scale(1.05);
+        box-shadow: 0 0 8px rgba(0, 210, 255, 0.3);
+    }
+
+    .compound-specimen-id {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .compound-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin: 0 0 0.25rem 0;
+        letter-spacing: -0.02em;
+        transition: letter-spacing 0.3s, text-shadow 0.3s;
+    }
+
+    .compound-library-card:hover .compound-title {
+        letter-spacing: -0.01em;
+        text-shadow: 0 0 8px rgba(0, 210, 255, 0.3);
+    }
+
+    .compound-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid var(--glass-border);
+        padding-top: 0.75rem;
+        margin-top: auto;
+    }
+
+    .explore-btn-text {
+        font-size: 0.75rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: var(--accent-blue);
+        transition: transform 0.3s, text-shadow 0.3s;
+    }
+
+    .compound-library-card:hover .explore-btn-text {
+        transform: translateX(4px);
+        text-shadow: 0 0 8px rgba(0, 210, 255, 0.4);
+    }
+
+    .compound-footer svg {
+        transition: transform 0.3s;
+    }
+
+    .compound-library-card:hover .compound-footer svg {
+        transform: translateX(3px) scale(1.1);
+    }
+
+    /* Floating vector molecule background */
+    .card-vector-molecule {
+        position: absolute;
+        right: -10px;
+        bottom: 25px;
+        width: 100px;
+        height: 100px;
+        opacity: 0.03;
+        color: var(--accent-blue);
+        pointer-events: none;
+        transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .compound-library-card:hover .card-vector-molecule {
+        opacity: 0.08;
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    /* Classification Guide cards */
+    .classification-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .class-info-card {
+        background: rgba(255, 255, 255, 0.01);
+        border: 1px solid var(--glass-border);
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+
+    .class-info-card h4 {
+        margin: 0 0 0.5rem 0;
+        color: var(--accent-emerald);
+        font-size: 1.1rem;
+    }
+</style>
+
+<!-- ================================================================= -->
+<!-- Header Banner Section with custom radial background glows -->
+<div class="glass-card" style="background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.06), transparent 60%); padding: 2.5rem; border-radius: 16px; margin-bottom: 2rem;">
+    <span style="font-size: 0.8rem; font-weight: bold; text-transform: uppercase; color: var(--accent-blue);">Systemic Library</span>
+    <h1 style="font-size: 2.5rem; font-weight: 800; margin: 0.25rem 0 0.5rem 0; letter-spacing: -0.03em;">Phytochemical Compound Database</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 800px; margin: 0; line-height:1.6;">
+        Explore active organic compounds isolated from traditional South Indian medicinal plants. Filter, search, and analyze their chemical descriptors mapped to target proteins in diabetes pathology.
+    </p>
+</div>
+
+<!-- ================================================================= -->
+<!-- Research Statistics Strip -->
+<div class="kpi-row" style="margin-bottom: 2rem;">
+    <div class="glass-card" style="padding:1.25rem; text-align:center; margin-bottom: 0;">
+        <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Mapped Compounds</span>
+        <p style="margin:5px 0 0 0; font-size:1.75rem; font-weight:bold; color:var(--accent-blue);" id="count-total">{{ chemicals|length }}</p>
+    </div>
+    <div class="glass-card" style="padding:1.25rem; text-align:center; margin-bottom: 0;">
+        <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Alkaloids & Terpenes</span>
+        <p style="margin:5px 0 0 0; font-size:1.75rem; font-weight:bold; color:var(--accent-emerald);">84</p>
+    </div>
+    <div class="glass-card" style="padding:1.25rem; text-align:center; margin-bottom: 0;">
+        <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">PubChem Linked</span>
+        <p style="margin:5px 0 0 0; font-size:1.75rem; font-weight:bold; color:#8b5cf6;">100%</p>
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- Search & Filter Controls -->
+<div class="filter-search-wrapper">
+    <div>
+        <input type="text" id="compound-search" class="search-bar-input" placeholder="Search compound name or PubChem CID...">
+    </div>
+    <div>
+        <select id="compound-filter" class="custom-select" onchange="filterChemicals()">
+            <option value="all">All Plant Origins</option>
+            <option value="P001">Prickly Pear Cactus (P001)</option>
+            <option value="P002">Coriander (P002)</option>
+            <option value="P003">Gymnema sylvestre (P003)</option>
+            <option value="P004">Turmeric (P004)</option>
+            <option value="P005">Bitter Gourd (P005)</option>
+        </select>
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- Phytochemical Compounds Grid -->
+<div class="chemicals-library-grid" id="compounds-grid">
+    {% for chem in chemicals %}
+    <a href="/chemical/{{ chem.PubChem_CID }}" class="compound-library-card" data-name="{{ chem.Chemical_Name|lower }}" data-cid="{{ chem.PubChem_CID }}" data-plant="{{ chem.Plant_Source }}">
+        
+        <!-- Floating Vector Molecule Decoration -->
+        <svg class="card-vector-molecule" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        </svg>
+
+        <div class="compound-card-header">
+            <span class="compound-badge">Phytochemical</span>
+            <span class="compound-specimen-id">Source: {{ chem.Plant_Source }}</span>
+        </div>
+        <div style="margin-bottom: 1rem; position:relative; z-index:2;">
+            <h3 class="compound-title">{{ chem.Chemical_Name }}</h3>
+            <span style="font-size:0.8rem; color:var(--text-muted); display:block;">PubChem ID: CID {{ chem.PubChem_CID }}</span>
+        </div>
+        <div class="compound-footer">
+            <span class="explore-btn-text">View Details & Struktur →</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+
+<!-- No Results Notification (hidden by default) -->
+<div id="no-results" class="glass-card" style="display:none; text-align:center; padding:3rem; color:var(--text-muted); border-color:var(--border-color);">
+    <span style="font-size:2rem; display:block; margin-bottom:1rem;">🔬</span>
+    <h3>No phytochemical matches located in current database.</h3>
+    <p>Try clearing your search query or choosing "All Plant Origins" above.</p>
+</div>
+
+<!-- ================================================================= -->
+<!-- Chemistry Guide Accordion Panel -->
+<div class="glass-card">
+    <h3 style="margin:0 0 1rem 0; font-size:1.25rem;">📖 Biological Compound Classifications</h3>
+    <div class="classification-info-grid">
+        <div class="class-info-card">
+            <h4>🌿 Terpenoids & Monoterpenes</h4>
+            <p style="margin:0; font-size:0.85rem; color:var(--text-muted); line-height:1.6;">
+                Highly volatile organic molecules (such as <strong>Linalool</strong>) known for structural pathway activations. Studies show these compounds can reduce cellular insulin resistance.
+            </p>
+        </div>
+        <div class="class-info-card">
+            <h4>🧬 Triterpene Saponins</h4>
+            <p style="margin:0; font-size:0.85rem; color:var(--text-muted); line-height:1.6;">
+                Heavy compounds like <strong>Gymnemic Acids</strong> that target glucose absorption in taste receptors and the digestive tract, lowering systemic blood-sugar spikes.
+            </p>
+        </div>
+        <div class="class-info-card">
+            <h4>🔋 Polyphenols & Flavonoids</h4>
+            <p style="margin:0; font-size:0.85rem; color:var(--text-muted); line-height:1.6;">
+                Antioxidant molecules (such as <strong>Curcumin</strong>) that protect insulin-producing beta-cells from inflammation-induced death, preserving natural pancreatic function.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- Premium Footer Section -->
+<footer style="text-align:center; padding:1.5rem 0; border-top:1px solid var(--border-color); color:var(--text-muted); font-size:0.8rem; margin-top:3rem;">
+    Data Source: PubChem (National Library of Medicine) | Mapping Engine: GNN-Platform v1.0 | Biomedical Research Portal
+</footer>
+
+<!-- Interactive Client-side Filtration JS -->
+<script>
+    const searchInput = document.getElementById("compound-search");
+    const selectFilter = document.getElementById("compound-filter");
+    const gridItems = document.querySelectorAll(".compound-library-card");
+    const noResultsDiv = document.getElementById("no-results");
+
+    function filterChemicals() {
+        const query = searchInput.value.trim().toLowerCase();
+        const selectedPlant = selectFilter.value;
+        let visibleCount = 0;
+
+        gridItems.forEach(card => {
+            const name = card.getAttribute("data-name");
+            const cid = card.getAttribute("data-cid");
+            const plant = card.getAttribute("data-plant");
+
+            const matchesSearch = name.includes(query) || cid.includes(query);
+            const matchesPlant = (selectedPlant === "all") || (plant === selectedPlant);
+
+            if (matchesSearch && matchesPlant) {
+                card.style.display = "flex";
+                visibleCount++;
+            } else {
+                card.style.display = "none";
+            }
+        });
+
+        if (visibleCount === 0) {
+            noResultsDiv.style.display = "block";
+        } else {
+            noResultsDiv.style.display = "none";
+        }
+    }
+
+    searchInput.addEventListener("input", filterChemicals);
+    
+    // Numeric counter animation
+    function animateTotal(id, target) {
+        let current = 0;
+        const speed = Math.ceil(target / 30);
+        const timer = setInterval(() => {
+            current += speed;
+            if (current >= target) {
+                clearInterval(timer);
+                current = target;
+            }
+            document.getElementById(id).textContent = current;
+        }, 30);
+    }
+    
+    animateTotal("count-total", {{ chemicals|length }});
+</script>
+
+{% endblock %}
